@@ -1,0 +1,15 @@
+# 依赖与构建产物
+node_modules/
+源码/dist/
+dist/
+
+# 编辑器与系统文件
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志与临时文件
+*.log
+*.tmp

@@ -1,0 +1,16 @@
+{
+  "name": "html-source-formatter-offline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline HTML, CSS and JavaScript whitespace formatter with validation",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "acorn": "8.19.0",
+    "fflate": "0.8.2",
+    "js-beautify": "2.0.3",
+    "postcss": "8.5.31",
+    "@vue/compiler-dom": "3.5.24"
+  },
+  "devDependencies": { "esbuild": "0.25.12" }
+}

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>HTML 代码格式化工具</title>
+    <style>
+      :root { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; color: #233249; background: #f5f7fb; font-size: 14px; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      button, input, textarea { font: inherit; }
+      button { cursor: pointer; }
+      button:disabled { opacity: .4; cursor: not-allowed; }
+      button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #9db5ff; outline-offset: 3px; }
+      .topbar { background: #fff; border-bottom: 1px solid #e4e9f1; padding: 18px max(24px, calc((100vw - 1320px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+      .brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 700; }
+      .brand-icon { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 10px; color: #fff; background: #315be4; font-family: monospace; font-size: 16px; }
+      .offline { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #607087; }
+      .offline::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #35a776; }
+      main { max-width: 1320px; margin: 0 auto; padding: 36px 24px 28px; }
+      .intro { display: flex; justify-content: space-between; gap: 22px; align-items: flex-start; margin-bottom: 25px; }
+      h1 { font-size: 28px; letter-spacing: -.6px; line-height: 1.4; margin: 0 0 10px; font-weight: 700; }
+      .lead { margin: 0; color: #68788e; font-size: 14px; line-height: 1.8; }
+      .version { font-size: 11px; color: #8490a3; background: #eaf0fc; border-radius: 5px; padding: 5px 8px; margin-top: 5px; white-space: nowrap; }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 0 0 22px; }
+      .stat { border: 1px solid #e4e9f1; background: #fff; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+      .stat span { color: #718096; font-size: 12px; }
+      .stat strong { color: #2d4771; font-size: 24px; font-weight: 650; }
+      .workspace { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 20px; align-items: start; }
+      .panel { background: #fff; border: 1px solid #e4e9f1; border-radius: 13px; }
+      .import-panel { padding: 20px; }
+      h2 { font-size: 15px; margin: 0; font-weight: 650; }
+      .section-kicker { font-size: 10px; color: #8c9ab0; letter-spacing: 1.5px; margin: 0 0 6px; }
+      .dropzone { border: 1.5px dashed #cdd8f1; border-radius: 10px; background: #f8faff; padding: 25px 12px 18px; text-align: center; margin: 18px 0 13px; transition: background .15s, border-color .15s; }
+      .dropzone.dragging { border-color: #315be4; background: #edf2ff; }
+      .drop-icon { margin: 0 auto 14px; width: 44px; height: 44px; border: 1px solid #dae4ff; border-radius: 12px; display: grid; place-items: center; background: #eef3ff; color: #315be4; font-family: monospace; font-size: 20px; }
+      .dropzone p { font-size: 12px; color: #6d7c94; margin: 0 0 15px; line-height: 1.8; }
+      .btn { padding: 9px 14px; border-radius: 7px; border: 1px solid #dce3ee; background: #fff; color: #3f526f; font-size: 12px; font-weight: 550; }
+      .btn.primary { background: #315be4; border-color: #315be4; color: #fff; }
+      .btn.primary:hover:not(:disabled) { background: #254bd0; }
+      .btn.full { width: 100%; margin-top: 10px; }
+      .btn.small { padding: 7px 10px; }
+      .folder-button { width: 100%; background: transparent; border: 0; color: #5270b0; padding: 5px 0 10px; font-size: 12px; }
+      .divider { height: 1px; background: #edf0f6; margin: 18px 0; }
+      .rule { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 12px; color: #65758e; }
+      .rule b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: #315be4; background: #eef3ff; font-size: 10px; }
+      .option { display: flex; align-items: flex-start; gap: 7px; color: #425674; font-size: 12px; line-height: 1.6; margin-top: 16px; }
+      input[type="checkbox"] { accent-color: #315be4; margin: 2px 0 0; }
+      .hint { font-size: 11px; color: #8a96a8; line-height: 1.8; margin: 10px 0 0; }
+      .files-head { padding: 19px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid #edf0f6; }
+      .head-actions { display: flex; align-items: center; gap: 8px; }
+      .text-button { border: none; background: none; padding: 4px 7px; color: #315be4; font-size: 11px; }
+      .muted { color: #8c98aa; }
+      .empty { padding: 72px 20px 82px; text-align: center; }
+      .empty-symbol { font-family: monospace; font-size: 32px; color: #c3cfe7; margin-bottom: 16px; }
+      .empty strong { font-weight: 500; color: #75849b; font-size: 13px; }
+      .empty p { margin: 9px 0 0; color: #9aa6b8; font-size: 12px; }
+      .table-wrap { overflow: auto; }
+      table { width: 100%; border-collapse: collapse; text-align: left; }
+      th { background: #fafbfd; color: #8b98ab; font-weight: 500; font-size: 11px; padding: 12px 15px; white-space: nowrap; }
+      td { padding: 13px 15px; border-top: 1px solid #f0f3f8; font-size: 12px; vertical-align: middle; }
+      tr.selected td { background: #f5f8ff; }
+      .file-name { font-size: 12px; font-weight: 550; color: #30496d; border: 0; background: none; padding: 0; max-width: 220px; overflow-wrap: anywhere; text-align: left; }
+      td small { display: block; color: #9aa6b7; font-size: 10px; margin-top: 5px; overflow-wrap: anywhere; max-width: 220px; }
+      td:last-child { white-space: nowrap; }
+      .line-count { color: #6d7e97; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .validation { color: #8795a9; font-size: 10px; white-space: nowrap; }
+      .badge { font-size: 10px; padding: 4px 7px; border-radius: 5px; display: inline-block; white-space: nowrap; }
+      .success { color: #23805e; background: #eaf7f0; }
+      .pending, .neutral { color: #75859c; background: #eff3f8; }
+      .warning { color: #a77a27; background: #fff6e3; }
+      .error { color: #ae4d58; background: #fff0f0; }
+      .status-line { color: #7b8ba1; font-size: 11px; line-height: 1.8; min-height: 44px; padding: 13px 20px; border-top: 1px solid #edf0f6; background: #fcfdff; border-radius: 0 0 13px 13px; }
+      .preview { margin-top: 23px; overflow: hidden; }
+      .preview-head { padding: 17px 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; border-bottom: 1px solid #e7ecf5; }
+      .preview-head h2 { font-size: 13px; overflow-wrap: anywhere; }
+      .preview-options { display: flex; gap: 14px; align-items: center; font-size: 11px; white-space: nowrap; color: #7e8ba0; }
+      .preview-options label { display: flex; gap: 6px; align-items: center; }
+      .editors { display: grid; grid-template-columns: 1fr 1fr; }
+      .editor + .editor { border-left: 1px solid #e3e9f4; }
+      .editor-head { display: flex; justify-content: space-between; padding: 11px 17px; background: #fafbfe; font-size: 11px; color: #7988a0; }
+      .editor-head span:last-child { color: #a2adbd; }
+      textarea { display: block; resize: vertical; width: 100%; height: 330px; min-height: 170px; background: #111c30; color: #c5d4eb; padding: 17px; border: 0; border-radius: 0; font-family: Consolas, "Cascadia Code", monospace; font-size: 11px; line-height: 1.75; white-space: pre; tab-size: 2; }
+      .checks { padding: 14px 18px 6px; display: flex; flex-wrap: wrap; gap: 7px; }
+      .check-chip { color: #477c6c; background: #f0f8f4; padding: 4px 8px; font-size: 10px; border-radius: 5px; }
+      .notes { color: #8996a9; font-size: 11px; line-height: 1.8; padding: 0 18px 12px; }
+      .notes p { margin: 5px 0; }
+      details { margin-top: 22px; padding: 17px 20px; font-size: 12px; line-height: 1.9; color: #74839a; }
+      summary { cursor: pointer; font-weight: 550; color: #526780; }
+      details p { margin: 10px 0 0; }
+      footer { text-align: center; color: #a2adbd; font-size: 10px; padding: 23px 0 5px; line-height: 1.9; }
+      [hidden] { display: none !important; }
+      @media (max-width: 1000px) { .workspace { grid-template-columns: 240px minmax(0, 1fr); gap: 15px; } main { padding: 25px 18px; } .validation { display: none; } th:nth-child(4) { display: none; } td, th { padding-left: 10px; padding-right: 10px; } }
+      @media (max-width: 720px) { .workspace { grid-template-columns: 1fr; } .intro { margin-bottom: 18px; } h1 { font-size: 23px; } .stats { gap: 8px; } .stat { padding: 13px 12px; } .stat strong { font-size: 20px; } .import-panel { padding: 18px; } .dropzone { padding: 18px; } .editors { grid-template-columns: 1fr; } .editor + .editor { border-left: 0; border-top: 1px solid #e3e9f4; } .preview-options { gap: 6px; } .topbar { padding: 15px 18px; } .offline { font-size: 10px; } }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">&lt;/&gt;</span> HTML 代码格式化工具</div>
+      <span class="offline">离线运行 · 文件留在本机</span>
+    </header>
+    <main>
+      <section class="intro">
+        <div><h1>让源码整齐，保留原有内容。</h1><p class="lead">批量整理 HTML、CSS 和 JavaScript 的排版，通过一致性检查后导出副本。</p></div>
+        <span class="version">v1.0.0</span>
+      </section>
+      <div class="stats">
+        <div class="stat"><span>已选择文件</span><strong id="file-count">0</strong></div>
+        <div class="stat"><span>通过检查</span><strong id="done-count">0</strong></div>
+        <div class="stat"><span>保留原样</span><strong id="keep-count">0</strong></div>
+      </div>
+      <div class="workspace">
+        <aside class="panel import-panel">
+          <p class="section-kicker">IMPORT FILES</p><h2>添加 HTML 文件</h2>
+          <div class="dropzone" id="dropzone">
+            <div class="drop-icon" aria-hidden="true">↥</div>
+            <p>将 HTML 文件拖到这里<br>支持一次添加多个文件</p>
+            <button type="button" class="btn" id="pick">选择文件</button>
+          </div>
+          <input type="file" id="files" accept=".html,.htm" multiple hidden>
+          <input type="file" id="folder" webkitdirectory multiple hidden>
+          <button type="button" class="folder-button" id="pick-folder">或选择整个文件夹</button>
+          <div class="divider"></div>
+          <p class="section-kicker">FORMATTING RULES</p><h2>固定格式化规则</h2>
+          <div class="rule"><b>2</b>每级缩进 2 个空格</div>
+          <div class="rule"><b>✓</b>保留字符串、属性和注释</div>
+          <div class="rule"><b>↗</b>批量下载新副本</div>
+          <label class="option"><input type="checkbox" id="vue-option" checked>整理可验证的 Vue 3 模板排版</label>
+          <p class="hint">无法安全调整的区域会保留原样。原文件始终仅用于读取。</p>
+          <button type="button" class="btn primary full" id="format" disabled>开始格式化</button>
+        </aside>
+        <section class="panel files-panel">
+          <div class="files-head"><h2>文件列表</h2><div class="head-actions"><button type="button" class="text-button muted" id="clear" disabled>清空</button><button type="button" class="btn primary small" id="download-all" disabled>下载全部 ZIP</button></div></div>
+          <div class="empty" id="empty"><div class="empty-symbol" aria-hidden="true">{ }</div><strong>从左侧添加需要整理的文件</strong><p>支持 .html / .htm，单个文件不超过 10 MB</p></div>
+          <div class="table-wrap" id="table-wrap" hidden><table><thead><tr><th>文件名</th><th>状态</th><th>行数</th><th>一致性检查</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <div class="status-line" id="notice" role="status" aria-live="polite">等待添加文件。所有处理均在当前浏览器内完成。</div>
+        </section>
+      </div>
+      <section class="panel preview" id="preview" hidden>
+        <div class="preview-head"><h2 id="preview-title">代码预览</h2><div class="preview-options"><label><input type="checkbox" id="sync-scroll" checked>同步滚动</label><button type="button" class="text-button" id="copy">复制副本代码</button></div></div>
+        <div class="editors">
+          <div class="editor"><div class="editor-head"><span>原始代码</span><span id="original-lines"></span></div><textarea id="original" aria-label="原始代码" spellcheck="false" readonly wrap="off"></textarea></div>
+          <div class="editor"><div class="editor-head"><span>格式化副本</span><span id="formatted-lines"></span></div><textarea id="formatted" aria-label="格式化后的代码" spellcheck="false" readonly wrap="off"></textarea></div>
+        </div>
+        <div class="checks" id="file-checks"></div><div class="notes" id="file-notes"></div>
+      </section>
+      <details class="panel"><summary>使用说明与处理范围</summary><p>选择文件 → 点击「开始格式化」→ 查看检查结果 → 下载全部 ZIP。解压到单独文件夹，文件名保持原名；如果 HTML 引用了共享 CSS、图片或脚本，请保持原有相对目录结构。</p><p>工具只调整可验证的空白字符。JavaScript 通过词法单元和语法树对比；CSS 对比属性、取值、选择器和注释；识别到 Vue 3 挂载模板时，对比整理前后的编译结果。普通静态 HTML 的元素间空白保留原样，避免改变行内布局或继承的 white-space 显示。</p><p>支持 UTF-8、带 BOM 的 UTF-8 / UTF-16 LE / UTF-16 BE，保留原编码及 BOM。语法错误、动态挂载入口、自定义 Vue 编译配置或无法验证的区域会保留原样。Vue 模板检查使用内置的 Vue 3.5.24 编译器。</p><p>导入文件只作为文本读取，工具不会运行其中的脚本。页面刷新或关闭后，当前文件列表会清空。</p></details>
+      <footer>HTML Source Formatter · 本地处理 · 原文件只读<br>包含 Acorn、js-beautify、PostCSS、Vue Compiler 与 fflate 的开源代码，许可见下载包。</footer>
+    </main>
+    <script>/*__APP_BUNDLE__*/</script>
+  </body>
+</html>
